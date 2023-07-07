@@ -276,16 +276,18 @@ bool TopicManager::subscribe(const SubscribeOptions& ops)
   std::string datatype = ops.datatype;
 
   SubscriptionPtr s(boost::make_shared<Subscription>(ops.topic, md5sum, datatype, ops.transport_hints));
+  subscriptions_.push_back(s);
+  lock.unlock();
   s->addCallback(ops.helper, ops.md5sum, ops.callback_queue, ops.queue_size, ops.tracked_object, ops.allow_concurrent_callbacks);
 
   if (!registerSubscriber(s, ops.datatype))
   {
     ROS_WARN("couldn't register subscriber on topic [%s]", ops.topic.c_str());
+    lock.lock();
+    subscriptions_.remove(s);
     s->shutdown();
     return false;
   }
-
-  subscriptions_.push_back(s);
 
   return true;
 }
