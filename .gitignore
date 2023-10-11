@@ -1,2 +1,6 @@
 *~
 *.pyc
+.idea/
+cmake-build-*/
+.vscode/
+
